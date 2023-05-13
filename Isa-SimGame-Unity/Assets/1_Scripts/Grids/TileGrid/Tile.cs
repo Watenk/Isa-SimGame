@@ -5,19 +5,23 @@ using UnityEngine;
 public class Tile
 {
     public ID groundID { get; set; }
-    public ID airID { get; set; }
+    public int oxygenAmount { get; set; }
+    public int carbonDioxideAmount { get; set; }
     public Vector2Int pos { get; set; }
     public int temp { get; set; }
     public int lightLevel { get; set; }
-    public int fertility { get; set; } //Need to implement
-    public int humidity { get; set; } //Need to implement
+    public int humidity { get; set; } 
+    public int fertility { get; set; } 
 
-    public Tile(ID groundID, ID airID, Vector2Int pos, int temp, int lightLevel)
+    public Tile(ID groundID, int oxygenAmount, int carbonDioxideAmount, Vector2Int pos, int temp, int lightLevel, int humidity, int fertility)
     {
         this.groundID = groundID;
-        this.airID = airID;
+        this.oxygenAmount = oxygenAmount;
+        this.carbonDioxideAmount = carbonDioxideAmount;
         this.pos = pos;
         this.temp = temp;
         this.lightLevel = lightLevel;
+        this.humidity = humidity;
+        this.fertility = fertility;
     }
 }

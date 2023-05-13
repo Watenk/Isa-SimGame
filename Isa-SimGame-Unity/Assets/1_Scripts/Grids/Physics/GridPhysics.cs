@@ -50,7 +50,7 @@ public class GridPhysics : BaseClass
 
     private void lightPhysics(Tile currentTile)
     {
-        physicsGrid.SetTile(currentTile.pos, currentTile.groundID, currentTile.airID, currentTile.temp, 80);
+        physicsGrid.SetLightLevel(currentTile.pos, 80);
     }
 
     private void GrassPhysics(Tile currentTile, Tile upTile, Tile rightTile, Tile downTile, Tile leftTile)
@@ -89,18 +89,20 @@ public class GridPhysics : BaseClass
             //Remove Grass
             if (currentTile.temp <= GrassMinTemp || currentTile.temp >= GrassMaxTemp)
             {
-                physicsGrid.SetTile(currentTile.pos, ID.dirt, currentTile.airID, currentTile.temp, currentTile.lightLevel);
+                physicsGrid.SetGroundID(currentTile.pos, ID.dirt);
+                physicsGrid.SetFertility(currentTile.pos, currentTile.fertility += 1);
             }
         }
     }
 
     private void CalcGrass(Tile targetTile)
     {
-        if (targetTile.groundID == ID.dirt && targetTile.airID == ID.carbonDioxite)
+        if (targetTile.groundID == ID.dirt && targetTile.carbonDioxideAmount >= 20)
         {
             if (targetTile.temp >= GrassMinTemp && targetTile.temp <= GrassMaxTemp && targetTile.lightLevel >= GrassMinLightLevel)
             {
-                physicsGrid.SetTile(targetTile.pos, ID.grass, ID.oxygen, targetTile.temp, targetTile.lightLevel);
+                physicsGrid.SetGroundID(targetTile.pos, ID.grass);
+                physicsGrid.SetAirAmount(targetTile.pos, targetTile.carbonDioxideAmount -= 1, targetTile.oxygenAmount += 1);
             }
         }
     }

@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 8326879}
   - component: {fileID: 8326878}
   m_Layer: 5
-  m_Name: MouseAirID
+  m_Name: MouseOxygenAmount
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -174,7 +174,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: MouseAirID
+  m_Text: OxygenAmount
 --- !u!222 &8326879
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -428,7 +428,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 723cc671324583c40a5e361da6e8a432, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpdateOrder: []
+  UpdateOrder:
+  - {fileID: 1940085505}
+  - {fileID: 198107505}
   UPS: 20
 --- !u!4 &197434731
 Transform:
@@ -509,7 +511,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b536cd9fc56c0c1428e74ff29ab75f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutoStart: 1
+  AutoStart: 0
   gridRenderer: {fileID: 1940085505}
   Width: 100
   Height: 100
@@ -548,10 +550,11 @@ MonoBehaviour:
   AutoStart: 1
   FrameRate: {fileID: 2071245012}
   AverageFrameRate: {fileID: 50679689}
-  FrameAmountForAverageFramerate: 30
+  FrameAmountForAverageFramerate: 15
   LowestFrame: {fileID: 322560007}
   MouseGroundID: {fileID: 711645910}
-  MouseAirID: {fileID: 8326878}
+  MouseOxygenAmount: {fileID: 8326878}
+  MouseCarbonDioxideAmount: {fileID: 1545918508}
   MouseTemp: {fileID: 715608441}
   MouseLight: {fileID: 1031834956}
 --- !u!114 &241474430
@@ -632,6 +635,7 @@ RectTransform:
   - {fileID: 322560009}
   - {fileID: 711645912}
   - {fileID: 8326880}
+  - {fileID: 1545918510}
   - {fileID: 715608443}
   - {fileID: 1031834958}
   m_Father: {fileID: 0}
@@ -1104,11 +1108,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 241474433}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1105.4998, y: -588.38}
+  m_AnchoredPosition: {x: 1109.2, y: -535.1}
   m_SizeDelta: {x: 299.5863, y: 50.5275}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1031834955
@@ -1184,11 +1188,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 241474433}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1117.3, y: -535.03}
+  m_AnchoredPosition: {x: 1121, y: -488.3}
   m_SizeDelta: {x: 275.9108, y: 56.1734}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1285410982
@@ -1241,6 +1245,86 @@ Transform:
   m_Father: {fileID: 198107504}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1545918507
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1545918510}
+  - component: {fileID: 1545918509}
+  - component: {fileID: 1545918508}
+  m_Layer: 5
+  m_Name: MouseCarbonDioxideAmount
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1545918508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1545918507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 30
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 3
+    m_MaxSize: 40
+    m_Alignment: 5
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: CarbonDioxideAmount
+--- !u!222 &1545918509
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1545918507}
+  m_CullTransparentMesh: 1
+--- !u!224 &1545918510
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1545918507}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 241474433}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 1069.7, y: -584.61}
+  m_SizeDelta: {x: 382.6807, y: 59.8901}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1940085500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1337,7 +1421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fdee3e5d421d9644a601b44a51a480f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AutoStart: 1
+  AutoStart: 0
   Grid: {fileID: 198107505}
   TileAmount: 10
   TexturePixelWidth: 320

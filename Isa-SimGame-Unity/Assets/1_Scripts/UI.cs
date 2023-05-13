@@ -12,7 +12,8 @@ public class UI : BaseClass
     public int FrameAmountForAverageFramerate;
     public Text LowestFrame;
     public Text MouseGroundID;
-    public Text MouseAirID;
+    public Text MouseOxygenAmount;
+    public Text MouseCarbonDioxideAmount;
     public Text MouseTemp;
     public Text MouseLight;
 
@@ -58,7 +59,8 @@ public class UI : BaseClass
         {
             Tile currentTile = mainGrid.GetTile(inputManager.mousePosGrid);
             MouseGroundID.text = currentTile.groundID.ToString() + " : GroundID";
-            MouseAirID.text = currentTile.airID.ToString() + " : AirID";
+            MouseOxygenAmount.text = currentTile.oxygenAmount.ToString() + " : OxygenAmount";
+            MouseCarbonDioxideAmount.text = currentTile.carbonDioxideAmount.ToString() + " : CarbonDioxideAmount";
             string temp = currentTile.temp.ToString().PadLeft(6);
             MouseTemp.text = temp.Insert(temp.Length - 3, ".") + " : Temp";
             MouseLight.text = currentTile.lightLevel + " : LightLevel";
