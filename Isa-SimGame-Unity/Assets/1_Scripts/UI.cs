@@ -16,6 +16,8 @@ public class UI : BaseClass
     public Text MouseCarbonDioxideAmount;
     public Text MouseTemp;
     public Text MouseLight;
+    public Text MouseHumidity;
+    public Text MouseFertility;
 
     private int averageFPS;
     private int lowestFrame;
@@ -64,6 +66,8 @@ public class UI : BaseClass
             string temp = currentTile.temp.ToString().PadLeft(6);
             MouseTemp.text = temp.Insert(temp.Length - 3, ".") + " : Temp";
             MouseLight.text = currentTile.lightLevel + " : LightLevel";
+            MouseHumidity.text = currentTile.humidity + " : Humidity";
+            MouseFertility.text = currentTile.fertility + " : Fertility";
         }
     }
 }

@@ -8,6 +8,6 @@ public class MainGrid : TileGrid
     {
         base.OnStart();
 
-        SetTile(new Vector2Int(1, 1), ID.grass, 30, 30, 20000, 0, 0, 0);
+        SetTile(new Vector2Int(1, 1), ID.grass, 30, 30, 20000, 0, 10, 10);
     }
 }

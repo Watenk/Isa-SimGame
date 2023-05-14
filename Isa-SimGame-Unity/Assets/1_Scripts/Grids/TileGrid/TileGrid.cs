@@ -141,7 +141,7 @@ public class TileGrid : BaseClass
         {
             for (int x = 0; x < Width; x++)
             {
-                gridArray[x, y] = new Tile(ID.dirt, 0, 0, new Vector2Int(x, y), 20000, 0, 0, 0);
+                gridArray[x, y] = new Tile(ID.dirt, 0, 10, new Vector2Int(x, y), 20000, 0, 10, 10);
             }
         }
     }

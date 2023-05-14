@@ -7,10 +7,16 @@ using UnityEngine;
 public class GridPhysics : BaseClass
 {
     public TileGrid physicsGrid; //Grid that should have physics
-    public int GrassSpreadChance;
-    public int GrassMinTemp;
-    public int GrassMaxTemp;
-    public int GrassMinLightLevel;
+
+    //PhysicsSettings
+    //Grass
+    private int GrassSpreadChance = 25;
+    private int GrassMinCarbonAmount = 5;
+    private int GrassMinTemp = 12000;
+    private int GrassMaxTemp = 37000;
+    private int GrassMinLightLevel = 50;
+    private int GrassMinHumidity = 5;
+    private int GrassMinFertility = 5;
 
     private Dictionary<ID, PhysicsID> PhysicsIDs = new Dictionary<ID, PhysicsID>();
 
@@ -90,6 +96,7 @@ public class GridPhysics : BaseClass
             if (currentTile.temp <= GrassMinTemp || currentTile.temp >= GrassMaxTemp)
             {
                 physicsGrid.SetGroundID(currentTile.pos, ID.dirt);
+                physicsGrid.SetAirAmount(currentTile.pos, currentTile.oxygenAmount, currentTile.carbonDioxideAmount += 1);
                 physicsGrid.SetFertility(currentTile.pos, currentTile.fertility += 1);
             }
         }
@@ -97,12 +104,15 @@ public class GridPhysics : BaseClass
 
     private void CalcGrass(Tile targetTile)
     {
-        if (targetTile.groundID == ID.dirt && targetTile.carbonDioxideAmount >= 20)
+        if (targetTile.groundID == ID.dirt && targetTile.carbonDioxideAmount >= GrassMinCarbonAmount)
         {
-            if (targetTile.temp >= GrassMinTemp && targetTile.temp <= GrassMaxTemp && targetTile.lightLevel >= GrassMinLightLevel)
+            if (targetTile.temp >= GrassMinTemp && targetTile.temp <= GrassMaxTemp && targetTile.lightLevel >= GrassMinLightLevel && targetTile.humidity >= GrassMinHumidity && targetTile.fertility >= GrassMinFertility)
             {
                 physicsGrid.SetGroundID(targetTile.pos, ID.grass);
-                physicsGrid.SetAirAmount(targetTile.pos, targetTile.carbonDioxideAmount -= 1, targetTile.oxygenAmount += 1);
+                physicsGrid.SetAirAmount(targetTile.pos, targetTile.oxygenAmount += 1, targetTile.carbonDioxideAmount -= 1);
+                physicsGrid.SetHumidity(targetTile.pos, targetTile.humidity -= 1);
+                physicsGrid.SetFertility(targetTile.pos, targetTile.fertility -= 1);
+                physicsGrid.SetTemp(targetTile.pos, targetTile.temp += Random.Range(50, 750));
             }
         }
     }
