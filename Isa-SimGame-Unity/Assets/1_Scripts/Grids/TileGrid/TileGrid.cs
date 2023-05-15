@@ -32,7 +32,7 @@ public class TileGrid : BaseClass
         return null;
     }
 
-    public void SetTile(Vector2Int pos, ID groundID, int oxygenAmount, int carbonDioxideAmount, int temp, int lightLevel, int humidity, int fertility) 
+    public void SetTile(Vector2Int pos, ID groundID, int oxygenAmount, int carbonDioxideAmount, int temp, int thermalConductivity, int lightLevel, int humidity, int fertility) 
     { 
         if (IsInGridBounds(pos))
         {
@@ -41,6 +41,7 @@ public class TileGrid : BaseClass
             currentTile.oxygenAmount = oxygenAmount;
             currentTile.carbonDioxideAmount = carbonDioxideAmount;
             currentTile.temp = temp;
+            currentTile.thermalConductivity = thermalConductivity;
             currentTile.lightLevel = lightLevel;
             currentTile.humidity = humidity;
             currentTile.fertility = fertility;
@@ -51,12 +52,13 @@ public class TileGrid : BaseClass
         }
     }
 
-    public void SetGroundID(Vector2Int pos, ID groundID)
+    public void SetGroundID(Vector2Int pos, ID groundID, int thermalConductivity)
     {
         if (IsInGridBounds(pos))
         {
             Tile currentTile = GetTile(pos);
             currentTile.groundID = groundID;
+            currentTile.thermalConductivity = thermalConductivity;
         }
     }
 
@@ -141,7 +143,7 @@ public class TileGrid : BaseClass
         {
             for (int x = 0; x < Width; x++)
             {
-                gridArray[x, y] = new Tile(ID.dirt, 0, 10, new Vector2Int(x, y), 20000, 0, 10, 10);
+                gridArray[x, y] = new Tile(ID.dirt, 0, 10, new Vector2Int(x, y), 20000, 10, 0, 10, 10);
             }
         }
     }

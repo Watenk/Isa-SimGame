@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.ShaderGraph.Serialization;
+using System.Globalization;
 using UnityEngine;
 
 public class GridPhysics : BaseClass
@@ -9,26 +8,77 @@ public class GridPhysics : BaseClass
     public TileGrid physicsGrid; //Grid that should have physics
 
     //PhysicsSettings
-    //Grass
-    private int GrassSpreadChance = 25;
-    private int GrassMinCarbonAmount = 5;
-    private int GrassMinTemp = 12000;
-    private int GrassMaxTemp = 37000;
-    private int GrassMinLightLevel = 50;
-    private int GrassMinHumidity = 5;
-    private int GrassMinFertility = 5;
+    //Light
+    public int time;
+    public int dayCounter;
+    private int dayDuration = 1200; //How many updates 1 day takes
+    private int lightAmount = 75; // percentage of day that has light
+    private int minSunLight = 40; // Min amount of light the sun can emit
+    private int maxSunLight = 90; // Max amount of light the sun can emit
+    private int currentSunLight;
+    private int currentDayLightLevel;
+    private int dayStart;
+    private int dayEnd;
 
-    private Dictionary<ID, PhysicsID> PhysicsIDs = new Dictionary<ID, PhysicsID>();
+    //Temp
+    private Dictionary<ID, int> thermalConductivity = new Dictionary<ID, int>()
+    {
+        { ID.dirt, 10 },
+        { ID.grass, 10 },
+        { ID.water, 5 },
+        { ID.ice, 5 },
+        { ID.stone, 2 },
+        { ID.lava, 20 },
+        { ID.carbonDioxite, 30 },
+        { ID.oxygen, 10 },
+    };
+
+    private Dictionary<ID, int> minTemp = new Dictionary<ID, int>()
+    {
+        { ID.water, -1000 },
+        { ID.lava, 1000000 },
+        { ID.carbonDioxite, -200000 },
+        { ID.oxygen, -200000 },
+    };
+
+    private Dictionary<ID, ID> ifMinTemp = new Dictionary<ID, ID>()
+    {
+        { ID.water, ID.ice },
+        { ID.lava, ID.stone },
+        { ID.carbonDioxite, ID.carbonDioxite }, //Need to implement
+        { ID.oxygen, ID.oxygen }, //Need to implement
+    };
+
+    private Dictionary<ID, int> maxTemp = new Dictionary<ID, int>()
+    {
+        { ID.dirt, 1000000 },
+        { ID.grass, 50000 },
+        { ID.water, 100000 },
+        { ID.ice, 1000 },
+        { ID.stone, 5000000 },
+    };
+
+    private Dictionary<ID, ID> ifMaxTemp = new Dictionary<ID, ID>()
+    {
+        { ID.dirt, ID.lava },
+        { ID.grass, ID.dirt },
+        { ID.water, ID.steam },
+        { ID.ice, ID.water },
+        { ID.stone, ID.lava },
+    };
+
+    //Grass Specific
+    private int grassSpreadChance = 40;
+    private int grassMinCarbonAmount = 5;
+    private int grassMinLightLevel = 50;
+    private int grassMinHumidity = 5;
+    private int grassMinFertility = 5;
 
     public override void OnStart()
     {
-        //PhysicsSettings                             TCo 
-        PhysicsIDs.Add(ID.dirt,          new PhysicsID( 30));
-        PhysicsIDs.Add(ID.grass,         new PhysicsID( 30));
-        PhysicsIDs.Add(ID.water,         new PhysicsID( 10));
-        PhysicsIDs.Add(ID.ice,           new PhysicsID( 10));
-        PhysicsIDs.Add(ID.stone,         new PhysicsID(  5));
-        PhysicsIDs.Add(ID.lava,          new PhysicsID( 10));
+        dayStart = dayDuration - (dayDuration * lightAmount / 100);
+        dayEnd = dayDuration - dayStart;
+        currentDayLightLevel = Random.Range(minSunLight, maxSunLight);
     }
 
     public override void OnUPS()
@@ -39,24 +89,55 @@ public class GridPhysics : BaseClass
             {
                 //Get tiles
                 Tile currentTile = physicsGrid.GetTile(new Vector2Int(x, y));
-                PhysicsIDs.TryGetValue(currentTile.groundID, out PhysicsID currentTilePhysics);
-
                 Tile upTile = physicsGrid.GetTile(new Vector2Int(x, y - 1));
                 Tile rightTile = physicsGrid.GetTile(new Vector2Int(x + 1, y));
                 Tile downTile = physicsGrid.GetTile(new Vector2Int(x, y + 1));
                 Tile leftTile = physicsGrid.GetTile(new Vector2Int(x - 1, y));
 
-                //physics
-                TempPhysics(currentTile, currentTilePhysics, upTile, rightTile, downTile, leftTile);
+                //Physics
+                TempPhysics(currentTile, upTile, rightTile, downTile, leftTile);
                 lightPhysics(currentTile);
                 GrassPhysics(currentTile, upTile, rightTile, downTile, leftTile);
+                AirPhysics();
             }
+        }
+
+        UpdateTime();
+        UpdateSunLight();
+    }
+
+    private void AirPhysics()
+    {
+
+    }
+
+    private void UpdateTime()
+    {
+        time++;
+
+        if (time >= dayDuration)
+        {
+            time = 0;
+            currentDayLightLevel = Random.Range(minSunLight, maxSunLight);
+            dayCounter++;
+        }
+    }
+
+    private void UpdateSunLight()
+    {
+        if (time >= dayStart && time <= dayEnd) //day
+        {
+            currentSunLight = currentDayLightLevel;
+        }
+        else //night
+        {
+            currentSunLight = 0;
         }
     }
 
     private void lightPhysics(Tile currentTile)
     {
-        physicsGrid.SetLightLevel(currentTile.pos, 80);
+        physicsGrid.SetLightLevel(currentTile.pos, currentSunLight);
     }
 
     private void GrassPhysics(Tile currentTile, Tile upTile, Tile rightTile, Tile downTile, Tile leftTile)
@@ -64,10 +145,10 @@ public class GridPhysics : BaseClass
 
         if (currentTile.groundID == ID.grass)
         {
-            int randomChance = Random.Range(1, 100);
+            int randomChance = Random.Range(1, 100 + (100 - currentTile.lightLevel));
 
             //Spawn Grass
-            if (randomChance <= GrassSpreadChance)
+            if (randomChance <= grassSpreadChance)
             {
                 int randomSide = Random.Range(0, 99);
 
@@ -91,24 +172,19 @@ public class GridPhysics : BaseClass
                     CalcGrass(leftTile);
                 }
             }
-
-            //Remove Grass
-            if (currentTile.temp <= GrassMinTemp || currentTile.temp >= GrassMaxTemp)
-            {
-                physicsGrid.SetGroundID(currentTile.pos, ID.dirt);
-                physicsGrid.SetAirAmount(currentTile.pos, currentTile.oxygenAmount, currentTile.carbonDioxideAmount += 1);
-                physicsGrid.SetFertility(currentTile.pos, currentTile.fertility += 1);
-            }
         }
     }
 
     private void CalcGrass(Tile targetTile)
     {
-        if (targetTile.groundID == ID.dirt && targetTile.carbonDioxideAmount >= GrassMinCarbonAmount)
+        if (targetTile.groundID == ID.dirt && targetTile.carbonDioxideAmount >= grassMinCarbonAmount)
         {
-            if (targetTile.temp >= GrassMinTemp && targetTile.temp <= GrassMaxTemp && targetTile.lightLevel >= GrassMinLightLevel && targetTile.humidity >= GrassMinHumidity && targetTile.fertility >= GrassMinFertility)
+            minTemp.TryGetValue(ID.grass, out int grassMinTemp);
+            maxTemp.TryGetValue(ID.grass, out int grassMaxTemp);
+            if (targetTile.temp >= grassMinTemp && targetTile.temp <= grassMaxTemp && targetTile.lightLevel >= grassMinLightLevel && targetTile.humidity >= grassMinHumidity && targetTile.fertility >= grassMinFertility)
             {
-                physicsGrid.SetGroundID(targetTile.pos, ID.grass);
+                thermalConductivity.TryGetValue(targetTile.groundID, out int targetThermalConductivity);
+                physicsGrid.SetGroundID(targetTile.pos, ID.grass, targetThermalConductivity);
                 physicsGrid.SetAirAmount(targetTile.pos, targetTile.oxygenAmount += 1, targetTile.carbonDioxideAmount -= 1);
                 physicsGrid.SetHumidity(targetTile.pos, targetTile.humidity -= 1);
                 physicsGrid.SetFertility(targetTile.pos, targetTile.fertility -= 1);
@@ -117,54 +193,67 @@ public class GridPhysics : BaseClass
         }
     }
 
-    private void TempPhysics(Tile currentTile, PhysicsID currentTilePhysics, Tile upTile, Tile rightTile, Tile downTile, Tile leftTile)
+    private void TempPhysics(Tile currentTile, Tile upTile, Tile rightTile, Tile downTile, Tile leftTile)
     {
         int randomSide = Random.Range(0, 99);
 
         if (randomSide <= 24 && upTile != null)
         {
-            PhysicsIDs.TryGetValue(upTile.groundID, out PhysicsID upTilePhysics);
-            CalcTemp(currentTile, currentTilePhysics, upTile, upTilePhysics);
+            CalcTemp(currentTile, upTile);
         }
 
         if (randomSide >= 25 && randomSide <= 49 && rightTile != null)
         {
-            PhysicsIDs.TryGetValue(rightTile.groundID, out PhysicsID rightTilePhysics);
-            CalcTemp(currentTile, currentTilePhysics, rightTile, rightTilePhysics);
+            CalcTemp(currentTile, rightTile);
         }
 
         if (randomSide >= 50 && randomSide <= 74 && downTile != null)
         {
-            PhysicsIDs.TryGetValue(downTile.groundID, out PhysicsID downTilePhysics);
-            CalcTemp(currentTile, currentTilePhysics, downTile, downTilePhysics);
+            CalcTemp(currentTile, downTile);
         }
 
         if (randomSide >= 75 && leftTile != null)
         {
-            PhysicsIDs.TryGetValue(leftTile.groundID, out PhysicsID leftTilePhysics);
-            CalcTemp(currentTile, currentTilePhysics, leftTile, leftTilePhysics);
+            CalcTemp(currentTile, leftTile);
         }
 
-        ////Check if MinTemp
-        //if (currentTilePhysics.hasMinTemp)
-        //{
-        //    if (currentTile.temp <= currentTilePhysics.minTemp)
-        //    {
-        //        mainGrid.SetTile(currentTile.pos, currentTilePhysics.ifMinTemp, currentTile.amount, currentTile.temp);
-        //    }
-        //}
+        //Check if MinTemp
+        if (minTemp.ContainsKey(currentTile.groundID))
+        {
+            minTemp.TryGetValue(currentTile.groundID, out int currentMinTemp);
+            if (currentTile.temp <= currentMinTemp)
+            {
+                //Grass dies
+                if (currentTile.groundID == ID.grass)
+                {
+                    physicsGrid.SetAirAmount(currentTile.pos, currentTile.oxygenAmount, currentTile.carbonDioxideAmount += 1);
+                    physicsGrid.SetFertility(currentTile.pos, currentTile.fertility += 1);
+                }
 
-        ////Check if MaxTemp
-        //if (currentPhysics.hasMaxTemp)
-        //{
-        //    if (currentTile.temp >= currentPhysics.maxTemp)
-        //    {
-        //        mainGrid.SetTile(currentTile.pos, currentPhysics.ifMaxTemp, currentTile.amount, currentTile.temp);
-        //    }
-        //}
+                //new values
+                ifMinTemp.TryGetValue(currentTile.groundID, out ID newTile);
+                thermalConductivity.TryGetValue(newTile, out int newThermalConductivity);
+
+                physicsGrid.SetGroundID(currentTile.pos, newTile, newThermalConductivity);
+            }
+        }
+
+        //Check if MaxTemp
+        if (maxTemp.ContainsKey(currentTile.groundID))
+        {
+            maxTemp.TryGetValue(currentTile.groundID, out int currentMaxTemp);
+            if (currentTile.temp >= currentMaxTemp)
+            {
+                //new values
+                ifMaxTemp.TryGetValue(currentTile.groundID, out ID newTile);
+                thermalConductivity.TryGetValue(newTile, out int newThermalConductivity);
+
+                physicsGrid.SetGroundID(currentTile.pos, newTile, newThermalConductivity);
+            }
+        }
     }
 
-    private void CalcTemp(Tile currentTile, PhysicsID currentTilePhysics, Tile targetTile, PhysicsID targetPhysics)
+    private void CalcTemp(Tile currentTile, Tile targetTile)
     {
         float tempDifference = Mathf.Abs(currentTile.temp - targetTile.temp) / 1000;
 
@@ -172,28 +261,28 @@ public class GridPhysics : BaseClass
         {
             if (currentTile.temp > targetTile.temp)
             {
-                if (currentTilePhysics.thermalConductivity > targetPhysics.thermalConductivity)
+                if (currentTile.thermalConductivity > targetTile.thermalConductivity)
                 {
-                    currentTile.temp -= targetPhysics.thermalConductivity + (int)tempDifference;
-                    targetTile.temp += targetPhysics.thermalConductivity + (int)tempDifference;
+                    currentTile.temp -= targetTile.thermalConductivity + (int)tempDifference;
+                    targetTile.temp += targetTile.thermalConductivity + (int)tempDifference;
                 }
                 else
                 {
-                    currentTile.temp -= currentTilePhysics.thermalConductivity + (int)tempDifference;
-                    targetTile.temp += currentTilePhysics.thermalConductivity + (int)tempDifference;
+                    currentTile.temp -= currentTile.thermalConductivity + (int)tempDifference;
+                    targetTile.temp += currentTile.thermalConductivity + (int)tempDifference;
                 }
             }
             else
             {
-                if (currentTilePhysics.thermalConductivity > targetPhysics.thermalConductivity)
+                if (currentTile.thermalConductivity > targetTile.thermalConductivity)
                 {
-                    currentTile.temp += targetPhysics.thermalConductivity + (int)tempDifference;
-                    targetTile.temp -= targetPhysics.thermalConductivity + (int)tempDifference;
+                    currentTile.temp += targetTile.thermalConductivity + (int)tempDifference;
+                    targetTile.temp -= targetTile.thermalConductivity + (int)tempDifference;
                 }
                 else
                 {
-                    currentTile.temp += currentTilePhysics.thermalConductivity + (int)tempDifference;
-                    targetTile.temp -= currentTilePhysics.thermalConductivity + (int)tempDifference;
+                    currentTile.temp += currentTile.thermalConductivity + (int)tempDifference;
+                    targetTile.temp -= currentTile.thermalConductivity + (int)tempDifference;
                 }
             }
         }

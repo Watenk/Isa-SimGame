@@ -12,9 +12,8 @@ public enum ID
     stone,
     lava,
 
-    //Main
-
     //Sky
     carbonDioxite,
     oxygen,
+    steam,
 }
